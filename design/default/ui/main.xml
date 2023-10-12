@@ -1,0 +1,8 @@
+<window theme="main" >
+  <view x="c" y="m" w="240" h="240" children_layout="default(r=2,c=2,s=10,m=10)">
+    <button style="settings" name="settings" focusable="true" focused="true"/>
+    <button style="dns" name="dns" focusable="true"/>
+    <button style="vpn" name="vpn" focusable="true"/>
+    <button style="ip" name="ip" focusable="true"/>
+  </view>
+</window>

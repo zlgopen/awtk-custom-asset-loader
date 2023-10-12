@@ -1,0 +1,14 @@
+import os
+import copy
+import awtk_config as awtk
+
+BIN_DIR=os.environ['BIN_DIR'];
+LIB_DIR=os.environ['LIB_DIR'];
+
+sources = Glob('*.c') 
+
+env=DefaultEnvironment().Clone()
+
+env['LIBS'] += ['asset_loader']
+env.Program(os.path.join(BIN_DIR, 'assets_pack'), ["assets_pack.c"])
+
