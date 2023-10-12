@@ -31,3 +31,4 @@ bin/image*
 bin/hello*
 .vscode
 .vs
+/data
