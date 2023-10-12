@@ -28,6 +28,7 @@
 #include "tkc/asset_info.h"
 
 #include "asset_loader_types_def.h"
+#include "../../src/asset_loader_custom.c"
 
 typedef struct asset_info_ex_t {
   asset_info_t* info;

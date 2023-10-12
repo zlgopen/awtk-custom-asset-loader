@@ -9,6 +9,5 @@ sources = Glob('*.c')
 
 env=DefaultEnvironment().Clone()
 
-env['LIBS'] += ['asset_loader']
 env.Program(os.path.join(BIN_DIR, 'assets_pack'), ["assets_pack.c"])
 

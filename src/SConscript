@@ -4,5 +4,4 @@ import sys
 env=DefaultEnvironment().Clone()
 BIN_DIR=os.environ['BIN_DIR'];
 
-env.SharedLibrary(os.path.join(BIN_DIR, 'asset_loader'), Glob('asset_loader_custom.c'))
 env.Program(os.path.join(BIN_DIR, 'demo'), Glob('*.c'))
