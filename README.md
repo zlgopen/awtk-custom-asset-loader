@@ -23,7 +23,7 @@ cd awtk-hello
 * 生成资源
 
 ```
-python ./scripts/update_res.py all
+python3 ./scripts/update_res.py all
 ./bin/assets_pack 
 ```
 
