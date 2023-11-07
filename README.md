@@ -1,8 +1,16 @@
 # awtk-custom-asset-loader 
 
-演示自定义资源加载器。
+演示自定义资源加载器（本项目主要是演示目的，实际使用时，请自己多测试，有问题请反馈）。
 
 本项目中的资源加载器，可以在没有文件系统的情况下，从 norflash 加载资源。
+
+基本工作原理：
+
+* 通过资源打包工具 (assets_pack) 将资源打包成二进制文件。
+
+* 将打包二进制文件烧录到 norflash 中。
+
+* 在代码中定义宏 ASSETS\_CUSTOM\_INIT()，并实现 my\_assets\_init 函数。在该函数中，将资源地址指向 norflash 中资源所在地址。
 
 ## 准备
 
@@ -13,40 +21,42 @@ git clone https://github.com/zlgopen/awtk.git
 cd awtk; scons; cd -
 ```
 
-2. 获取 awtk-hello 并编译
+* 编译 资源打包工具 和 demo
 
 ```
-git clone https://github.com/zlgopen/awtk-hello.git
-cd awtk-hello
+scons
 ```
 
 * 生成资源
 
 ```
 python3 ./scripts/update_res.py all
-./bin/assets_pack 
 ```
 
-> 生成的资源包为：data/assets.bin
+## 资源打包工具
 
-* 编译 PC 版本
+assets_pack 负责将资源打包成二进制文件。
 
-```
-scons
-```
-
-* 编译 LINUX FB 版本
+* 用法
 
 ```
-scons LINUX_FB=true
+./bin/assets_pack <项目根目录> <生成的资源包文件名>
 ```
 
-> 完整编译选项请参考 [编译选项](https://github.com/zlgopen/awtk-widget-generator/blob/master/docs/build_options.md)
+**项目根目录** 中必须存在事先生成好的 res 目录。
 
-## 运行
+**生成的资源包文件名** 为二进制文件，用来烧录到 norflash 中。
+
+* 示例（打包当前项目）
 
 ```
-./bin/demo
+./bin/assets_pack ./ data/assets.bin
+```
+
+* 示例（打包其它项目）
+
+```
+./bin/assets_pack ../awtk-ftpd ../awtk-ftpd/assets.bin
 ```
 
 ## 使用方法
@@ -75,3 +85,13 @@ static ret_t my_assets_init(void) {
   return RET_OK;
 }
 ```
+
+## 注意
+
+在嵌入式项目中，加入下面的源文件即可：
+
+* src/asset_loader_custom.h
+* src/asset_loader_types_def.h
+* src/asset_loader_custom.c      
+
+> src 目录中其它文件只是用于演示目的，可根据需要参考。 tools/assets_pack 目录下的文件为资源打包工具，只是在 PC 上使用。

@@ -95,6 +95,7 @@ static ret_t load_asset_data(const char* theme, const char* path, darray_t* asse
   char* extname = NULL;
   return_value_if_fail(path != NULL, RET_BAD_PARAMS);
 
+  log_debug("load %s\n", path);
   dir = fs_open_dir(fs, path);
   return_value_if_fail(dir != NULL, RET_BAD_PARAMS);
 
@@ -194,6 +195,11 @@ static ret_t assets_pack(darray_t* assets, const char* filename) {
   uint32_t header_size = sizeof(assets_header_t) + n * sizeof(asset_entry_t);
   assets_header_t header = {0};
   FILE* fp = fopen(filename, "wb");
+
+  if (fp == NULL) {
+    log_debug("open %s failed.\n", filename);
+  }
+
   return_value_if_fail(fp != NULL, RET_BAD_PARAMS);
 
   header.count = n;
@@ -232,52 +238,69 @@ static ret_t assets_pack(darray_t* assets, const char* filename) {
   return RET_OK;
 }
 
-static ret_t load_asset_data_of_theme(const char* theme, const char* image_scale, darray_t* assets) {
+static ret_t load_asset_data_of_theme(const char* app_root, const char* theme, const char* image_scale, darray_t* assets) {
   char filename[MAX_PATH + 1] = {0};
-  tk_snprintf(filename, sizeof(filename), "res/assets/%s/raw/images/%s", theme, image_scale);
+  tk_snprintf(filename, sizeof(filename), "%s/res/assets/%s/raw/images/%s", app_root, theme, image_scale);
   load_asset_data(theme, filename, assets, ASSET_TYPE_IMAGE);
 
-  tk_snprintf(filename, sizeof(filename), "res/assets/%s/raw/images/%s", theme, "xx");
-  if (file_exist(filename)) {
+  tk_snprintf(filename, sizeof(filename), "%s/res/assets/%s/raw/images/%s", app_root, theme, "xx");
+  if (dir_exist(filename)) {
     load_asset_data(theme, filename, assets, ASSET_TYPE_IMAGE);
   }
 
-  tk_snprintf(filename, sizeof(filename), "res/assets/%s/raw/images/%s", theme, "svg");
-  if (file_exist(filename)) {
+  tk_snprintf(filename, sizeof(filename), "%s/res/assets/%s/raw/images/%s", app_root, theme, "svg");
+  if (dir_exist(filename)) {
     load_asset_data(theme, filename, assets, ASSET_TYPE_IMAGE);
   }
 
-  tk_snprintf(filename, sizeof(filename), "res/assets/%s/raw/fonts", theme);
-  load_asset_data(theme, filename, assets, ASSET_TYPE_FONT);
+  tk_snprintf(filename, sizeof(filename), "%s/res/assets/%s/raw/fonts", app_root, theme);
+  if (dir_exist(filename)) {
+    load_asset_data(theme, filename, assets, ASSET_TYPE_FONT);
+  }
 
-  tk_snprintf(filename, sizeof(filename), "res/assets/%s/raw/strings", theme);
-  load_asset_data(theme, filename, assets, ASSET_TYPE_STRINGS);
+  tk_snprintf(filename, sizeof(filename), "%s/res/assets/%s/raw/strings", app_root, theme);
+  if (dir_exist(filename)) {
+    load_asset_data(theme, filename, assets, ASSET_TYPE_STRINGS);
+  }
 
-  tk_snprintf(filename, sizeof(filename), "res/assets/%s/raw/ui", theme);
-  load_asset_data(theme, filename, assets, ASSET_TYPE_UI);
+  tk_snprintf(filename, sizeof(filename), "%s/res/assets/%s/raw/ui", app_root, theme);
+  if (dir_exist(filename)) {
+    load_asset_data(theme, filename, assets, ASSET_TYPE_UI);
+  }
 
-  tk_snprintf(filename, sizeof(filename), "res/assets/%s/raw/styles", theme);
-  load_asset_data(theme, filename, assets, ASSET_TYPE_STYLE);
+  tk_snprintf(filename, sizeof(filename), "%s/res/assets/%s/raw/styles", app_root, theme);
+  if (dir_exist(filename)) {
+    load_asset_data(theme, filename, assets, ASSET_TYPE_STYLE);
+  }
 
-  tk_snprintf(filename, sizeof(filename), "res/assets/%s/raw/data", theme);
-  load_asset_data(theme, filename, assets, ASSET_TYPE_DATA);
+  tk_snprintf(filename, sizeof(filename), "%s/res/assets/%s/raw/data", app_root, theme);
+  if (dir_exist(filename)) {
+    load_asset_data(theme, filename, assets, ASSET_TYPE_DATA);
+  }
 
-  tk_snprintf(filename, sizeof(filename), "res/assets/%s/raw/scripts", theme);
-  load_asset_data(theme, filename, assets, ASSET_TYPE_SCRIPT);
+  tk_snprintf(filename, sizeof(filename), "%s/res/assets/%s/raw/scripts", app_root, theme);
+  if (dir_exist(filename)) {
+    load_asset_data(theme, filename, assets, ASSET_TYPE_SCRIPT);
+  }
 
-  tk_snprintf(filename, sizeof(filename), "res/assets/%s/raw/xml", theme);
-  load_asset_data(theme, filename, assets, ASSET_TYPE_XML);
-
+  tk_snprintf(filename, sizeof(filename), "%s/res/assets/%s/raw/xml", app_root, theme);
+  if (dir_exist(filename)) {
+    load_asset_data(theme, filename, assets, ASSET_TYPE_XML);
+  }
   return RET_OK;
 }
 
-static ret_t load_all_assets(darray_t* assets, const char* image_scale) {
+static ret_t load_all_assets(darray_t* assets, const char* app_root, const char* image_scale) {
   fs_t* fs = os_fs();
   fs_dir_t* dir = NULL;
   fs_item_t item;
+  char assets_root[MAX_PATH+1] = {0};
+  return_value_if_fail(app_root != NULL, RET_BAD_PARAMS);
   return_value_if_fail(fs != NULL && assets != NULL, RET_BAD_PARAMS);
 
-  dir = fs_open_dir(fs, "res/assets");
+  tk_snprintf(assets_root, MAX_PATH, "%s/res/assets", app_root);
+
+  dir = fs_open_dir(fs, assets_root);
   return_value_if_fail(dir != NULL, RET_BAD_PARAMS);
 
   while (fs_dir_read(dir, &item) == RET_OK) {
@@ -286,7 +309,7 @@ static ret_t load_all_assets(darray_t* assets, const char* image_scale) {
     }
 
     if (item.is_dir) {
-      load_asset_data_of_theme(item.name, image_scale, assets);
+      load_asset_data_of_theme(app_root, item.name, image_scale, assets);
     }
   }
   fs_dir_close(dir);
@@ -321,20 +344,38 @@ MAIN() {
   darray_t assets;
   char data_path[MAX_PATH + 1] = {0};
   char filename[MAX_PATH + 1] = {0};
-  const char* image_scale = argc > 1 ? argv[1] : "x1";
+  const char* image_scale = "x1";
+  const char* app_root = "./";
+  const char* output_assets_bin = ASSETS_BIN_FILENAME;
+
+  if (argc == 2 && (tk_str_eq(argv[1], "-h") || tk_str_eq(argv[1], "--help"))) {
+    log_debug("%s app_root output_assets_bin\n", argv[0]);
+    log_debug("ex: %s ./ data/assets.bin\n", argv[0]);
+    return 0;
+  }
+
+  if( argc > 1) {
+    app_root = argv[1];
+  }
+
+  if (argc > 2) {
+    output_assets_bin = argv[2];
+  }
+
+  log_debug("app_root: %s\n", app_root);
+  log_debug("output_assets_bin: %s\n", output_assets_bin);
 
   darray_init(&assets, 100, (tk_destroy_t)asset_info_ex_destroy, NULL);
 
-  //load_all_assets(&assets, image_scale);
+  load_asset_data_of_theme(app_root, "default", image_scale, &assets);
 
-  load_asset_data_of_theme("default", image_scale, &assets);
-  path_prepend_app_root(filename,  ASSETS_BIN_FILENAME);
+  path_prepend_app_root(filename,  output_assets_bin);
   path_dirname(filename, data_path, sizeof(data_path));
   fs_create_dir_r(os_fs(), data_path);
 
-  assets_pack(&assets, ASSETS_BIN_FILENAME);
-  verify_assets_data(ASSETS_BIN_FILENAME, &assets);
-  log_debug("output result to %s\n", ASSETS_BIN_FILENAME);
+  assets_pack(&assets, output_assets_bin);
+  verify_assets_data(output_assets_bin, &assets);
+  log_debug("output result to %s\n", output_assets_bin);
   
   darray_deinit(&assets);
 }
